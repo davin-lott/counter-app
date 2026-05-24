@@ -604,6 +604,7 @@
       display: none;
     }
 
+
     @keyframes spin {
       100% {
         transform: rotate(360deg);
@@ -838,12 +839,12 @@
       transition: var(--transition-smooth);
     }
 
-    .switch-container input:checked + .switch-slider {
+    .switch-container input:checked+.switch-slider {
       background-color: rgba(6, 182, 212, 0.2);
       border-color: var(--accent-cyan);
     }
 
-    .switch-container input:checked + .switch-slider:before {
+    .switch-container input:checked+.switch-slider:before {
       transform: translateX(22px);
       background-color: var(--accent-cyan);
       box-shadow: 0 0 8px rgba(6, 182, 212, 0.6);
@@ -897,10 +898,14 @@
           <button id="save-settings-btn" class="btn-save">Save</button>
         </div>
       </div>
-      <div class="form-group" style="margin-top: 1.25rem; flex-direction: row; align-items: center; justify-content: space-between; gap: 1rem;">
+      <div class="form-group"
+        style="margin-top: 1.25rem; flex-direction: row; align-items: center; justify-content: space-between; gap: 1rem;">
         <div style="display: flex; flex-direction: column; gap: 0.2rem;">
-          <label for="allow-cellular-input" style="cursor: pointer; margin-bottom: 0;">Allow Sync on Cellular Data</label>
-          <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: none; letter-spacing: normal;">Enable syncing even when not connected to Wi-Fi</span>
+          <label for="allow-cellular-input" style="cursor: pointer; margin-bottom: 0;">Allow Sync on Cellular
+            Data</label>
+          <span
+            style="font-size: 0.7rem; color: var(--text-muted); text-transform: none; letter-spacing: normal;">Enable
+            syncing even when not connected to Wi-Fi</span>
         </div>
         <label class="switch-container">
           <input type="checkbox" id="allow-cellular-input">
@@ -916,7 +921,11 @@
 
     <!-- Bottom Control Bar -->
     <footer class="control-bar">
-
+      <!-- Platinum Percentage Box -->
+      <div class="stat-box">
+        <div class="stat-label">Platinum %</div>
+        <div id="platinum-percentage" class="stat-value"><span>0</span></div>
+      </div>
       <!-- Statistics Row -->
       <div class="stats-row">
         <div class="stat-box">
@@ -1166,7 +1175,19 @@
 
       // Update session totals indicators
       document.getElementById('session-total').querySelector('span').textContent = total;
-
+      //TODO: Make it so the Platinum % is displayed as "Need Input" instead of Nan when nothing is inputed
+      // Calculate and display Platinum Percentage: said yes / (said yes + said no + didn't ask)
+      let saidYes = sessionData["Said Yes"] || 0;
+      let saidNo = sessionData["Said No"] || 0;
+      let didntAsk = sessionData["Didn't Ask"] || 0;
+      let platinumTotal = saidYes + saidNo + didntAsk;
+      let platinumPercentage = (saidYes / platinumTotal) * 100;
+      if (platinumTotal === 0) {
+        document.getElementById("platinum-percentage").querySelector("span").textContent = "Need Input";
+      }
+      else {
+        document.getElementById("platinum-percentage").querySelector("span").textContent = platinumPercentage.toFixed(2) + "%";
+      }
       // Update last sync time display
       const lastSync = localStorage.getItem('last_sync_time');
       document.getElementById('last-sync-time').textContent = lastSync || "Never";
