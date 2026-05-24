@@ -1236,8 +1236,13 @@
         navigator.connection.addEventListener('change', () => triggerUpdate(false));
       }
 
-      // Initial check (no notification to avoid load spam)
+      // Initial check
       triggerUpdate(false);
+
+      // Periodically refresh connection status every 2 seconds to perfectly catch connection transitions
+      setInterval(() => {
+        updateNetworkStatus(false);
+      }, 2000);
     }
 
     // ----------------------------------------------------
