@@ -237,7 +237,7 @@
     }
 
     .settings-panel.open {
-      max-height: 250px;
+      max-height: 300px;
       border-width: 1px;
       margin-bottom: 0.5rem;
       padding: 1.25rem;
@@ -798,6 +798,56 @@
         aspect-ratio: 1.1 / 1;
       }
     }
+
+    /* Premium Switch Button */
+    .switch-container {
+      position: relative;
+      display: inline-block;
+      width: 46px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .switch-container input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-slider {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      transition: var(--transition-smooth);
+    }
+
+    .switch-slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-secondary);
+      border-radius: 50%;
+      transition: var(--transition-smooth);
+    }
+
+    .switch-container input:checked + .switch-slider {
+      background-color: rgba(6, 182, 212, 0.2);
+      border-color: var(--accent-cyan);
+    }
+
+    .switch-container input:checked + .switch-slider:before {
+      transform: translateX(22px);
+      background-color: var(--accent-cyan);
+      box-shadow: 0 0 8px rgba(6, 182, 212, 0.6);
+    }
   </style>
 </head>
 
@@ -846,6 +896,16 @@
           <input type="text" id="script-url-input" placeholder="https://script.google.com/macros/s/.../exec">
           <button id="save-settings-btn" class="btn-save">Save</button>
         </div>
+      </div>
+      <div class="form-group" style="margin-top: 1.25rem; flex-direction: row; align-items: center; justify-content: space-between; gap: 1rem;">
+        <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+          <label for="allow-cellular-input" style="cursor: pointer; margin-bottom: 0;">Allow Sync on Cellular Data</label>
+          <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: none; letter-spacing: normal;">Enable syncing even when not connected to Wi-Fi</span>
+        </div>
+        <label class="switch-container">
+          <input type="checkbox" id="allow-cellular-input">
+          <span class="switch-slider"></span>
+        </label>
       </div>
     </div>
 
@@ -1152,6 +1212,20 @@
         urlInput.value = savedUrl;
       }
 
+      // Load Cellular sync preference
+      const allowCellularInput = document.getElementById('allow-cellular-input');
+      const allowCellular = localStorage.getItem('allow_cellular_sync') === 'true';
+      allowCellularInput.checked = allowCellular;
+
+      allowCellularInput.addEventListener('change', () => {
+        localStorage.setItem('allow_cellular_sync', allowCellularInput.checked);
+        if (allowCellularInput.checked) {
+          showToast('Sync allowed over cellular data.', 'success');
+        } else {
+          showToast('Sync restricted to Wi-Fi only.', 'warning');
+        }
+      });
+
       toggleBtn.addEventListener('click', () => {
         panel.classList.toggle('open');
       });
@@ -1220,7 +1294,13 @@
         const isSaveData = conn.saveData === true;
         const isLowSpeed = ['slow-2g', '2g', '3g'].includes(conn.effectiveType);
 
-        if (isCellular || isSaveData || isLowSpeed) {
+        // Block if connection type is not wifi/ethernet
+        const isNotWifi = conn.type && conn.type !== 'wifi' && conn.type !== 'ethernet';
+
+        // Check user setting (default: false, i.e., Wi-Fi only required)
+        const allowCellular = localStorage.getItem('allow_cellular_sync') === 'true';
+
+        if (!allowCellular && (isCellular || isSaveData || isLowSpeed || isNotWifi)) {
           showToast('Sync paused to save cellular data. Please connect to Wi-Fi to sync.', 'warning');
           return;
         }
