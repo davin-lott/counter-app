@@ -1187,10 +1187,9 @@
           const isCellular = conn.type === 'cellular';
           const isSaveData = conn.saveData === true;
           const isLowSpeed = ['slow-2g', '2g', '3g'].includes(conn.effectiveType);
-          const isNotWifi = conn.type && conn.type !== 'wifi' && conn.type !== 'ethernet';
           const allowCellular = localStorage.getItem('allow_cellular_sync') === 'true';
 
-          if (!allowCellular && (isCellular || isSaveData || isLowSpeed || isNotWifi)) {
+          if (!allowCellular && (isCellular || isSaveData || isLowSpeed)) {
             isRestricted = true;
           }
         }
@@ -1218,16 +1217,26 @@
     }
 
     function initNetworkListeners() {
-      window.addEventListener('online', () => updateNetworkStatus(true));
-      window.addEventListener('offline', () => updateNetworkStatus(true));
+      const triggerUpdate = (notify) => {
+        // Run immediately
+        updateNetworkStatus(notify);
+
+        // Run again after 800ms to handle OS connection handover latency cleanly
+        setTimeout(() => {
+          updateNetworkStatus(false);
+        }, 800);
+      };
+
+      window.addEventListener('online', () => triggerUpdate(true));
+      window.addEventListener('offline', () => triggerUpdate(true));
 
       // Listen to connection changes (e.g. switching between Wi-Fi and mobile data)
       if (navigator.connection) {
-        navigator.connection.addEventListener('change', () => updateNetworkStatus(false));
+        navigator.connection.addEventListener('change', () => triggerUpdate(false));
       }
 
       // Initial check (no notification to avoid load spam)
-      updateNetworkStatus(false);
+      triggerUpdate(false);
     }
 
     // ----------------------------------------------------
@@ -1329,13 +1338,10 @@
         const isSaveData = conn.saveData === true;
         const isLowSpeed = ['slow-2g', '2g', '3g'].includes(conn.effectiveType);
 
-        // Block if connection type is not wifi/ethernet
-        const isNotWifi = conn.type && conn.type !== 'wifi' && conn.type !== 'ethernet';
-
         // Check user setting (default: false, i.e., Wi-Fi only required)
         const allowCellular = localStorage.getItem('allow_cellular_sync') === 'true';
 
-        if (!allowCellular && (isCellular || isSaveData || isLowSpeed || isNotWifi)) {
+        if (!allowCellular && (isCellular || isSaveData || isLowSpeed)) {
           showToast('Sync paused to save cellular data. Please connect to Wi-Fi to sync.', 'warning');
           return;
         }
