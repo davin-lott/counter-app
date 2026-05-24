@@ -1175,15 +1175,15 @@
 
       // Update session totals indicators
       document.getElementById('session-total').querySelector('span').textContent = total;
-      //TODO: Make it so the Platinum % is displayed as "Need Input" instead of Nan when nothing is inputed
       // Calculate and display Platinum Percentage: said yes / (said yes + said no + didn't ask)
       let saidYes = sessionData["Said Yes"] || 0;
       let saidNo = sessionData["Said No"] || 0;
       let didntAsk = sessionData["Didn't Ask"] || 0;
       let platinumTotal = saidYes + saidNo + didntAsk;
       let platinumPercentage = (saidYes / platinumTotal) * 100;
+      //Makes it so the Platinum % is displayed as "Needs Input" instead of Nan when nothing is inputed
       if (platinumTotal === 0) {
-        document.getElementById("platinum-percentage").querySelector("span").textContent = "Need Input";
+        document.getElementById("platinum-percentage").querySelector("span").textContent = "Needs Input";
       }
       else {
         document.getElementById("platinum-percentage").querySelector("span").textContent = platinumPercentage.toFixed(2) + "%";
