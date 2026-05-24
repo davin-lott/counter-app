@@ -1187,9 +1187,10 @@
           const isCellular = conn.type === 'cellular';
           const isSaveData = conn.saveData === true;
           const isLowSpeed = ['slow-2g', '2g', '3g'].includes(conn.effectiveType);
+          const isNotWifi = conn.type && conn.type !== 'wifi' && conn.type !== 'ethernet';
           const allowCellular = localStorage.getItem('allow_cellular_sync') === 'true';
 
-          if (!allowCellular && (isCellular || isSaveData || isLowSpeed)) {
+          if (!allowCellular && (isCellular || isSaveData || isLowSpeed || isNotWifi)) {
             isRestricted = true;
           }
         }
@@ -1337,11 +1338,12 @@
         const isCellular = conn.type === 'cellular';
         const isSaveData = conn.saveData === true;
         const isLowSpeed = ['slow-2g', '2g', '3g'].includes(conn.effectiveType);
+        const isNotWifi = conn.type && conn.type !== 'wifi' && conn.type !== 'ethernet';
 
         // Check user setting (default: false, i.e., Wi-Fi only required)
         const allowCellular = localStorage.getItem('allow_cellular_sync') === 'true';
 
-        if (!allowCellular && (isCellular || isSaveData || isLowSpeed)) {
+        if (!allowCellular && (isCellular || isSaveData || isLowSpeed || isNotWifi)) {
           showToast('Sync paused to save cellular data. Please connect to Wi-Fi to sync.', 'warning');
           return;
         }
