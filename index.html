@@ -1213,6 +1213,19 @@
         return;
       }
 
+      // Wi-Fi Protection Logic: check for unmetered high-speed connection
+      if (navigator.connection) {
+        const conn = navigator.connection;
+        const isCellular = conn.type === 'cellular';
+        const isSaveData = conn.saveData === true;
+        const isLowSpeed = ['slow-2g', '2g', '3g'].includes(conn.effectiveType);
+
+        if (isCellular || isSaveData || isLowSpeed) {
+          showToast('Sync paused to save cellular data. Please connect to Wi-Fi to sync.', 'warning');
+          return;
+        }
+      }
+
       // 2. Fetch the target script URL
       const targetUrl = localStorage.getItem('google_sheet_script_url') || GOOGLE_SCRIPT_URL;
       if (!targetUrl || targetUrl === 'YOUR_SCRIPT_URL') {
