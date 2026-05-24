@@ -1175,26 +1175,59 @@
     // ----------------------------------------------------
     // Offline / Online Status Detection
     // ----------------------------------------------------
-    function initNetworkListeners() {
-      const updateNetworkStatus = () => {
-        const badge = document.getElementById('connection-badge');
-        const text = document.getElementById('connection-text');
+    function updateNetworkStatus(showNotifications = false) {
+      const badge = document.getElementById('connection-badge');
+      const text = document.getElementById('connection-text');
 
-        if (navigator.onLine) {
+      if (navigator.onLine) {
+        // Wi-Fi Protection Check: determine if connection is restricted cellular/metered
+        let isRestricted = false;
+        if (navigator.connection) {
+          const conn = navigator.connection;
+          const isCellular = conn.type === 'cellular';
+          const isSaveData = conn.saveData === true;
+          const isLowSpeed = ['slow-2g', '2g', '3g'].includes(conn.effectiveType);
+          const isNotWifi = conn.type && conn.type !== 'wifi' && conn.type !== 'ethernet';
+          const allowCellular = localStorage.getItem('allow_cellular_sync') === 'true';
+
+          if (!allowCellular && (isCellular || isSaveData || isLowSpeed || isNotWifi)) {
+            isRestricted = true;
+          }
+        }
+
+        if (isRestricted) {
+          badge.className = 'status-badge offline';
+          text.textContent = 'OFFLINE (CELLULAR)';
+          if (showNotifications) {
+            showToast('Sync paused. Connect to Wi-Fi to sync.', 'warning');
+          }
+        } else {
           badge.className = 'status-badge online';
           text.textContent = 'ONLINE';
-        } else {
-          badge.className = 'status-badge offline';
-          text.textContent = 'OFFLINE (CACHED)';
+          if (showNotifications) {
+            showToast('App is online.', 'success');
+          }
+        }
+      } else {
+        badge.className = 'status-badge offline';
+        text.textContent = 'OFFLINE (CACHED)';
+        if (showNotifications) {
           showToast('App went offline. Saving events locally.', 'warning');
         }
-      };
+      }
+    }
 
-      window.addEventListener('online', updateNetworkStatus);
-      window.addEventListener('offline', updateNetworkStatus);
+    function initNetworkListeners() {
+      window.addEventListener('online', () => updateNetworkStatus(true));
+      window.addEventListener('offline', () => updateNetworkStatus(true));
 
-      // Set initial status
-      updateNetworkStatus();
+      // Listen to connection changes (e.g. switching between Wi-Fi and mobile data)
+      if (navigator.connection) {
+        navigator.connection.addEventListener('change', () => updateNetworkStatus(false));
+      }
+
+      // Initial check (no notification to avoid load spam)
+      updateNetworkStatus(false);
     }
 
     // ----------------------------------------------------
@@ -1224,6 +1257,8 @@
         } else {
           showToast('Sync restricted to Wi-Fi only.', 'warning');
         }
+        // Instantly refresh network badge display
+        updateNetworkStatus(false);
       });
 
       toggleBtn.addEventListener('click', () => {
