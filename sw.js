@@ -1,23 +1,25 @@
 /**
  * Service Worker for Offline Event Counter PWA
  * 
- * Implements standard caching for local-first execution.
+ * Implements a strict Cache-First (Cache falling back to Network) strategy
+ * to ensure 100% offline functionality after the initial install.
  */
 
-const CACHE_NAME = 'event-counter-cache-v1';
+const CACHE_NAME = 'event-counter-cache-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap'
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
-// 1. Installation - Cache static assets
+// 1. Installation - Cache static local assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[Service Worker] Caching app shell assets');
-        // Use addAll to pre-cache standard shell assets
+        console.log('[Service Worker] Pre-caching static assets for offline use');
         return cache.addAll(ASSETS_TO_CACHE);
       })
       .then(() => self.skipWaiting()) // Force activation
@@ -40,7 +42,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 3. Fetch - Offline Caching Strategy
+// 3. Fetch - Offline Cache-First Caching Strategy
 self.addEventListener('fetch', (event) => {
   // Exclude Google Script POST requests or other non-GET API requests
   if (event.request.method !== 'GET') {
@@ -49,30 +51,24 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      // Serve cached asset if present
+      // 1. Return cached asset if present immediately
       if (cachedResponse) {
-        // Asynchronously update cache in the background (Stale-While-Revalidate)
-        fetch(event.request)
-          .then((networkResponse) => {
-            if (networkResponse.status === 200) {
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, networkResponse);
-              });
-            }
-          })
-          .catch(() => { /* Silent catch if offline */ });
-          
         return cachedResponse;
       }
 
-      // Fallback to standard network request
+      // 2. Otherwise, fetch from network
       return fetch(event.request)
         .then((networkResponse) => {
-          // Cache newly requested GET resources on-the-fly (e.g., dynamic Google font files)
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic' && !event.request.url.includes('googleapis') && !event.request.url.includes('gstatic')) {
+          // Check if valid response and from the same origin before caching
+          if (
+            !networkResponse ||
+            networkResponse.status !== 200 ||
+            networkResponse.type !== 'basic'
+          ) {
             return networkResponse;
           }
 
+          // Cache newly requested GET resources on-the-fly (dynamic local assets)
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
@@ -81,7 +77,7 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(() => {
-          // If offline and request is for page, return cached entry
+          // Offline fallback for page navigation
           if (event.request.mode === 'navigate') {
             return caches.match('./index.html');
           }

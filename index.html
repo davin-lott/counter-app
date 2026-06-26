@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <title>Offline Event Counter</title>
 
   <!-- SEO & PWA Meta Tags -->
@@ -15,18 +15,10 @@
   <meta name="apple-mobile-web-app-title" content="Event Counter">
 
   <!-- Apple Touch Icon -->
-  <link rel="apple-touch-icon"
-    href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%231e1b4b'/><text x='50%' y='55%' font-size='90' font-family='sans-serif' fill='%2338bdf8' dominant-baseline='middle' text-anchor='middle'>📊</text></svg>">
+  <link rel="apple-touch-icon" href="icon-192.png">
 
-  <!-- Google Fonts: Outfit -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet">
-
-  <!-- PWA Manifest Inline (URL-encoded JSON) -->
-  <link rel="manifest"
-    href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Offline%20Event%20Counter%22%2C%22short_name%22%3A%22Event%20Counter%22%2C%22description%22%3A%22Local-first%20event%20counter%20PWA%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230b0f19%22%2C%22theme_color%22%3A%22%230b0f19%22%2C%22orientation%22%3A%22portrait%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27192%27%20height%3D%27192%27%20viewBox%3D%270%200%20192%20192%27%3E%3Crect%20width%3D%27192%27%20height%3D%27192%27%20rx%3D%2748%27%20fill%3D%27%231e1b4b%27%2F%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2755%25%27%20font-size%3D%2796%27%20font-family%3D%27sans-serif%27%20fill%3D%27%2338bdf8%27%20dominant-baseline%3D%27middle%27%20text-anchor%3D%27middle%27%3E%F0%9F%93%8A%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%2C%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27512%27%20height%3D%27512%27%20viewBox%3D%270%200%20512%20512%27%3E%3Crect%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27128%27%20fill%3D%27%231e1b4b%27%2F%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2755%25%27%20font-size%3D%27256%27%20font-family%3D%27sans-serif%27%20fill%3D%27%2338bdf8%27%20dominant-baseline%3D%27middle%27%20text-anchor%3D%27middle%27%3E%F0%9F%93%8A%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
 
   <style>
     /* CSS Variables & Premium Themes */
@@ -55,7 +47,7 @@
       --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
       --shadow-glow: 0 0 20px rgba(56, 189, 248, 0.25);
 
-      --font-primary: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-primary: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       --transition-bounce: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
